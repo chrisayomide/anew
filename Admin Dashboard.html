@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #FF6F61;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+        }
+        .hamburger {
+            cursor: pointer;
+            font-size: 24px;
+            color: #007BFF; /* Different color for hamburger */
+        }
+        .logout {
+            color: white;
+            text-decoration: none;
+            background: #FF6F61; /* Different background for logout */
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .logout:hover {
+            background: #FF4C51; /* Darker shade on hover */
+        }
+        .menu {
+            display: none; /* Hide menu initially */
+            flex-direction: column;
+            background: white;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: auto; /* Set right to auto to limit width */
+            width: 250px; /* Fixed width for the menu */
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .menu button {
+            padding: 10px;
+            border: none;
+            text-align: left;
+            background: none;
+            cursor: pointer;
+            width: 100%; /* Keep buttons full width for easy clicking */
+            transition: background 0.3s;
+        }
+        .menu button:hover {
+            background: rgba(0, 123, 255, 0.1);
+        }
+        .section {
+            max-width: 800px;
+            margin: auto;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none; /* Hide all sections initially */
+        }
+        .lecturer {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #e7f3fe;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .lecturer:hover {
+            background-color: #d1e9ff;
+        }
+        .evaluations {
+            display: none;
+            padding: 10px;
+            background: #f0f8ff;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .feedback {
+            margin-top: 10px;
+        }
+        .feedback textarea {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+        .feedback button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .feedback button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <span class="hamburger" onclick="toggleMenu()">☰</span>
+    <a class="logout" href="TSS.html">Log Out</a>
+</div>
+
+<div class="menu" id="menu">
+    <button onclick="showSection('manage-lecturers')">Manage Lecturers</button>
+    <button onclick="showSection('manage-students')">Manage Students</button>
+    <button onclick="showSection('manage-evaluations')">Manage Evaluations</button>
+</div>
+
+<h1>Admin Dashboard</h1>
+
+<div class="section" id="manage-lecturers">
+    <h2>Manage Lecturers</h2>
+    <div class="lecturer-list" id="lecturer-list"></div>
+</div>
+
+<div class="section" id="manage-students">
+    <h2>Manage Students</h2>
+    <p>List of students will be shown here.</p>
+</div>
+
+<div class="section" id="manage-evaluations">
+    <h2>Manage Evaluations</h2>
+    <p>View and manage evaluations here.</p>
+</div>
+
+<script>
+    const evaluations = {
+        // Initial data structure is empty for lecturer evaluations
+    };
+
+    function toggleMenu() {
+        const menu = document.getElementById("menu");
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none'; // Hide all sections
+        });
+        document.getElementById(sectionId).style.display = 'block'; // Show the selected section
+        document.getElementById("menu").style.display = 'none'; // Hide menu after selection
+
+        if (sectionId === 'manage-lecturers') {
+            populateLecturers(); // Populate lecturers when this section is shown
+        }
+    }
+
+    function populateLecturers() {
+        const lecturerList = document.getElementById("lecturer-list");
+        lecturerList.innerHTML = ''; // Clear previous content
+        // Example lecturer data (add more as needed)
+        const sampleLecturers = [
+            { id: 1, name: "Prof. Adejoro Tobi", course: "CSC111", scores: [4, 5, 4, 3, 5, 4] },
+            { id: 2, name: "Dr. Adetola T", course: "CSC101", scores: [5, 5, 4, 5, 5, 5] }
+        ];
+
+        sampleLecturers.forEach(lecturer => {
+            const lecturerDiv = document.createElement("div");
+            lecturerDiv.classList.add("lecturer");
+            lecturerDiv.innerHTML = `<h3>${lecturer.name} (${lecturer.course})</h3>`;
+            lecturerDiv.onclick = () => showEvaluations(lecturer.id, lecturer.scores);
+            lecturerList.appendChild(lecturerDiv);
+        });
+    }
+
+    function showEvaluations(lecturerId, scores) {
+        const evaluationsDiv = document.getElementById(`evaluations-${lecturerId}`);
+        if (evaluationsDiv) {
+            evaluationsDiv.style.display = evaluationsDiv.style.display === 'none' ? 'block' : 'none';
+        } else {
+            const newDiv = document.createElement("div");
+            newDiv.classList.add("evaluations");
+            newDiv.id = `evaluations-${lecturerId}`;
+            newDiv.innerHTML = `<h4>Evaluations for Lecturer ID: ${lecturerId}</h4>`;
+            newDiv.innerHTML += `<p>Scores: ${scores.join(", ")}</p>`;
+            newDiv.innerHTML += `
+                <div class="feedback">
+                    <h5>Send Feedback</h5>
+                    <textarea id="feedback-${lecturerId}" placeholder="Enter feedback here..."></textarea>
+                    <button onclick="sendFeedback(${lecturerId})">Send Feedback</button>
+                </div>
+            `;
+            document.getElementById("lecturer-list").appendChild(newDiv);
+        }
+    }
+
+    function sendFeedback(lecturerId) {
+        const feedbackText = document.getElementById(`feedback-${lecturerId}`).value;
+        alert(`Feedback sent to Lecturer ID ${lecturerId}: ${feedbackText}`);
+        document.getElementById(`feedback-${lecturerId}`).value = ''; // Clear textarea
+    }
+
+    window.onload = () => {
+        // Optionally, show a default section or keep it hidden
+    };
+</script>
+
+</body>
+</html>

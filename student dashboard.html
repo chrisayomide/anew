@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #FF6F61;
+            font-size: 1.5em;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        .hamburger {
+            cursor: pointer;
+            font-size: 24px;
+            color: #007BFF;
+        }
+        .logout-btn {
+            background-color: #FF6F61;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #FF4C51;
+        }
+        .menu {
+            display: none;
+            flex-direction: column;
+            background: white;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            width: 150px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .menu button {
+            padding: 10px;
+            border: none;
+            text-align: left;
+            background: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        .menu button:hover {
+            background: rgba(0, 123, 255, 0.1);
+        }
+        .lecturer-list, .course-list {
+            max-width: 100%;
+            margin: auto;
+            padding: 10px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .lecturer {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #e7f3fe;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .evaluation-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .submit-btn {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .chart-container {
+            margin-top: 20px;
+            position: relative;
+            height: 30vh;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <span class="hamburger" onclick="toggleMenu()">☰</span>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+</div>
+
+<div class="menu" id="menu">
+    <button onclick="showSection('lecturer-list')">List of Lecturers</button>
+    <button onclick="showSection('courses')">List of Courses</button>
+</div>
+
+<h1>Student Dashboard</h1>
+
+<div class="lecturer-list" id="lecturer-list"></div>
+<div class="course-list" id="course-list"></div>
+
+<script>
+    const lecturers = [
+        { id: 1, name: "Prof. Adejoro Tobi", course: "CSC111" },
+        { id: 2, name: "Dr. Adetola T", course: "CSC101" },
+        { id: 3, name: "Mrs. Awe", course: "CSC102" },
+        { id: 4, name: "Mr. Adetunji M.", course: "CSC105" },
+    ];
+
+    const courses = ["CSC111", "CSC101", "CSC102", "CSC105"];
+    const evaluations = {};
+
+    function toggleMenu() {
+        const menu = document.getElementById("menu");
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function showSection(section) {
+        if (section === 'lecturer-list') {
+            populateLecturers();
+            document.getElementById("lecturer-list").style.display = 'block';
+            document.getElementById("course-list").style.display = 'none'; // Hide course list
+        } else if (section === 'courses') {
+            displayCourses();
+            document.getElementById("course-list").style.display = 'block';
+            document.getElementById("lecturer-list").style.display = 'none'; // Hide lecturer list
+        }
+        toggleMenu(); // Hide menu after selection
+    }
+
+    function populateLecturers() {
+        const lecturerList = document.getElementById("lecturer-list");
+        lecturerList.innerHTML = ''; // Clear previous content
+        lecturers.forEach(lecturer => {
+            const lecturerDiv = document.createElement("div");
+            lecturerDiv.classList.add("lecturer");
+            lecturerDiv.innerHTML = `<h3>${lecturer.name} (${lecturer.course})</h3>`;
+            lecturerDiv.onclick = () => {
+                hideOtherLecturers(lecturer.id);
+                showEvaluationForm(lecturer.id);
+            };
+            lecturerList.appendChild(lecturerDiv);
+        });
+    }
+
+    function hideOtherLecturers(selectedId) {
+        const lecturerList = document.getElementById("lecturer-list");
+        const lecturersDivs = lecturerList.children;
+        for (let div of lecturersDivs) {
+            if (!div.innerText.includes(`(${lecturers.find(l => l.id === selectedId).course})`)) {
+                div.style.display = 'none';
+            }
+        }
+    }
+
+    function displayCourses() {
+        const courseListDiv = document.getElementById("course-list");
+        courseListDiv.innerHTML = ''; // Clear previous content
+        courses.forEach(course => {
+            const courseDiv = document.createElement("div");
+            courseDiv.innerHTML = `<h4>${course}</h4>`;
+            courseListDiv.appendChild(courseDiv);
+        });
+    }
+
+    function showEvaluationForm(lecturerId) {
+        const evaluationFormDiv = document.createElement("div");
+        evaluationFormDiv.classList.add("evaluation-form");
+        evaluationFormDiv.innerHTML = `<h4>Evaluate ${lecturers.find(l => l.id === lecturerId).name}</h4>`;
+        
+        const metrics = ["Performance", "Punctuality", "Friendliness", "Use of English", "Engagement", "Feedback", "Availability", "Course Material"];
+        metrics.forEach(metric => {
+            const metricDiv = document.createElement("div");
+            metricDiv.innerHTML = `
+                <label>${metric}:</label>
+                <select id="metric-${lecturerId}-${metric}" required>
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+            `;
+            evaluationFormDiv.appendChild(metricDiv);
+        });
+
+        const submitButton = document.createElement("button");
+        submitButton.classList.add("submit-btn");
+        submitButton.innerText = "Submit Evaluation";
+        submitButton.onclick = () => submitEvaluation(lecturerId, evaluationFormDiv);
+        
+        evaluationFormDiv.appendChild(submitButton);
+        document.getElementById("lecturer-list").appendChild(evaluationFormDiv);
+        evaluationFormDiv.style.display = 'block'; 
+    }
+
+    function submitEvaluation(lecturerId, formDiv) {
+        const metrics = ["Performance", "Use of English", "Engagement", "Feedback", "Availability", "Course Material"];
+        evaluations[lecturerId] = {};
+        
+        metrics.forEach(metric => {
+            const value = document.getElementById(`metric-${lecturerId}-${metric}`).value;
+            evaluations[lecturerId][metric] = value;
+        });
+
+        displayEvaluationChart(lecturerId);
+    }
+
+    function displayEvaluationChart(lecturerId) {
+        const ctx = document.createElement('canvas');
+        ctx.classList.add('chart-container');
+        const evaluationData = Object.values(evaluations[lecturerId]).map(Number);
+        
+        const chartContainer = document.createElement('div');
+        chartContainer.appendChild(ctx);
+        document.getElementById("lecturer-list").appendChild(chartContainer);
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Performance", "Use of English", "Engagement", "Feedback", "Availability", "Course Material"],
+                datasets: [{
+                    label: `Evaluations for ${lecturers.find(l => l.id === lecturerId).name}`,
+                    data: evaluationData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                }
+            }
+        });
+    }
+
+    function logout() {
+        window.location.href = 'TSS.html'; // Redirect to the main dashboard
+    }
+
+    window.onload = () => {
+        document.getElementById("lecturer-list").style.display = 'none'; // Hide lecturer list initially
+        document.getElementById("course-list").style.display = 'none'; // Hide course list initially
+    };
+</script>
+
+</body>
+</html>
